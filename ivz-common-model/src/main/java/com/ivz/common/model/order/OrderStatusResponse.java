@@ -1,19 +1,15 @@
 package com.ivz.common.model.order;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderStatusResponse {
-  private final String orderId;
-  private final OrderStatus status;
-
-  public OrderStatusResponse(String orderId, OrderStatus status) {
-    this.orderId = orderId;
-    this.status = status;
-  }
-
-  public String getOrderId() {
-    return orderId;
-  }
-
-  public OrderStatus getStatus() {
-    return status;
-  }
+  private String orderId;
+  private OrderStatus status;
 }
