@@ -1,5 +1,6 @@
 package com.ivz.p2iws.config;
 
+import com.ivz.common.model.latency.LatencyMonitor;
 import com.ivz.jwt.security.JwtTokenService;
 import com.ivz.jwt.security.JwtTokenValidationResult;
 import jakarta.servlet.FilterChain;
@@ -30,8 +31,12 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
     throws ServletException, IOException {
+    long requestId = LatencyMonitor.monitor(0L, "BearerTokenAuthenticationFilter.doFilterInternal",
+      System.currentTimeMillis(), request.getServletPath());
     if (!requiresAuthentication(request)) {
       filterChain.doFilter(request, response);
+      LatencyMonitor.monitor(requestId, "BearerTokenAuthenticationFilter.doFilterInternal",
+        System.currentTimeMillis(), request.getServletPath());
       return;
     }
 
@@ -39,6 +44,8 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
     if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
       authenticationEntryPoint.commence(request, response,
         new InsufficientAuthenticationException("Missing Bearer token"));
+      LatencyMonitor.monitor(requestId, "BearerTokenAuthenticationFilter.doFilterInternal",
+        System.currentTimeMillis(), request.getServletPath());
       return;
     }
 
@@ -47,12 +54,16 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
     if (!validationResult.isValid()) {
       authenticationEntryPoint.commence(request, response,
         new InsufficientAuthenticationException(validationResult.getFailureMessage()));
+      LatencyMonitor.monitor(requestId, "BearerTokenAuthenticationFilter.doFilterInternal",
+        System.currentTimeMillis(), request.getServletPath());
       return;
     }
 
     Authentication authentication = new UsernamePasswordAuthenticationToken(validationResult.getSubject(), token, List.of());
     SecurityContextHolder.getContext().setAuthentication(authentication);
     filterChain.doFilter(request, response);
+    LatencyMonitor.monitor(requestId, "BearerTokenAuthenticationFilter.doFilterInternal",
+      System.currentTimeMillis(), request.getServletPath());
   }
 
   @Override
@@ -63,7 +74,11 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
     throws ServletException, IOException {
+    long requestId = LatencyMonitor.monitor(0L, "BearerTokenAuthenticationFilter.doFilterNestedErrorDispatch",
+      System.currentTimeMillis(), request.getServletPath());
     doFilterInternal(request, response, filterChain);
+    LatencyMonitor.monitor(requestId, "BearerTokenAuthenticationFilter.doFilterNestedErrorDispatch",
+      System.currentTimeMillis(), request.getServletPath());
   }
 
   private boolean requiresAuthentication(HttpServletRequest request) {

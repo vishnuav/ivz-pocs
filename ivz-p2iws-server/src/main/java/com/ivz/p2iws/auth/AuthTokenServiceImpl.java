@@ -1,5 +1,6 @@
 package com.ivz.p2iws.auth;
 
+import com.ivz.common.model.latency.LatencyMonitor;
 import com.ivz.jwt.security.JwtTokenService;
 import com.ivz.jwt.security.JwtTokenValidationResult;
 import java.util.Map;
@@ -20,9 +21,11 @@ public class AuthTokenServiceImpl implements AuthTokenService {
 
   @Override
   public AuthTokenResponse createToken(AuthTokenRequest request) {
+    long requestId = LatencyMonitor.monitor(0L, "AuthTokenServiceImpl.createToken", System.currentTimeMillis(), request.getActorId());
     validateCredentials(request);
     String token = jwtTokenService.createToken(request.getActorId(), Map.of("clientId", request.getClientId()));
     JwtTokenValidationResult validationResult = jwtTokenService.validateToken(token);
+    LatencyMonitor.monitor(requestId, "AuthTokenServiceImpl.createToken", System.currentTimeMillis(), request.getActorId());
     return new AuthTokenResponse(token, "Bearer", validationResult.getExpiresAt());
   }
 

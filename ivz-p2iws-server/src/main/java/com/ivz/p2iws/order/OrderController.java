@@ -1,5 +1,6 @@
 package com.ivz.p2iws.order;
 
+import com.ivz.common.model.latency.LatencyMonitor;
 import com.ivz.common.model.order.OrderStatusResponse;
 import com.ivz.oms.order.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class OrderController {
 
   @GetMapping("/api/orders/status")
   public ResponseEntity<OrderStatusResponse> getOrderStatus(@RequestParam("orderId") String orderId) {
-    return ResponseEntity.ok(orderService.getOrderStatus(orderId));
+    long requestId = LatencyMonitor.monitor(0L, "OrderController.getOrderStatus", System.currentTimeMillis(), orderId);
+    ResponseEntity<OrderStatusResponse> responseEntity = ResponseEntity.ok(orderService.getOrderStatus(orderId));
+    LatencyMonitor.monitor(requestId, "OrderController.getOrderStatus", System.currentTimeMillis(), orderId);
+    return responseEntity;
   }
 }
