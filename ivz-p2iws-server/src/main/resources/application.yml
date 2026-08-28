@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: ivz-p2iws-server
+  profiles:
+    default: local
+logging:
+  file:
+    path: logs
+
+ivz:
+  auth:
+    client-id: demo-client
+    client-secret: demo-secret
+    issuer: ivz-p2iws
+    token-lifetime: PT15M
+    private-key-location: classpath:security/jwt-private-key.pem
+    public-key-location: classpath:security/jwt-public-key.pem
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+server:
+  port: 6080
+---
+spring:
+  config:
+    activate:
+      on-profile: uat
+
+server:
+  port: 7080
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  port: 8080

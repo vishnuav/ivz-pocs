@@ -1,0 +1,65 @@
+<configuration>
+  <springProperty name="LOG-FILE-DIR" scope="context" source="logging.file.path"/>
+  <springProperty name="LOG-FILE-PREFIX" scope="context" source="spring.application.name"/>
+  <property name="LOG_FILE_PATTERN"
+            value="${LOG-FILE-DIR}/archived/${LOG-FILE-PREFIX}.%d{yyyy-MM-dd,America/New_York}"/>
+  <property scope="context" name="LOG_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSSSS,America/New_York} %p %logger{36} [%t] %m%n"/>
+  <property scope="context" name="MAX_FILE_SIZE" value="50MB"/>
+
+  <appender class="ch.qos.logback.core.ConsoleAppender" name="CONSOLE">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>DEBUG</level>
+    </filter>
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+      <layout class="com.ivz.common.utils.logmask.MaskingPatternLayout">
+        <maskPattern>\"params\"\s*:\s*\"(.*?)\"</maskPattern>
+        <maskPattern>\"clientSecret\"\s*:\s*\"(.*?)\"</maskPattern>
+        <maskPattern>\"token\"\s*:\s*\"(.*?)\"</maskPattern>
+        <pattern>${LOG_PATTERN}</pattern>
+      </layout>
+    </encoder>
+  </appender>
+
+  <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="APP">
+    <append>true</append>
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+      <layout class="com.ivz.common.utils.logmask.MaskingPatternLayout">
+        <maskPattern>\"params\"\s*:\s*\"(.*?)\"</maskPattern>
+        <maskPattern>\"clientSecret\"\s*:\s*\"(.*?)\"</maskPattern>
+        <maskPattern>\"token\"\s*:\s*\"(.*?)\"</maskPattern>
+        <pattern>${LOG_PATTERN}</pattern>
+      </layout>
+    </encoder>
+    <file>${LOG-FILE-DIR}/${LOG-FILE-PREFIX}-INFO.log</file>
+    <immediateFlush>true</immediateFlush>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_PATTERN}-INFO.%i.log</fileNamePattern>
+      <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+    </rollingPolicy>
+  </appender>
+
+  <!-- Async wrappers -->
+  <appender name="ASYNC_APP" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>1024</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <includeCallerData>false</includeCallerData>
+    <appender-ref ref="APP"/>
+  </appender>
+
+  <!-- Spring/Web MVC logging -->
+  <logger level="info" name="org.springframework.boot.web.embedded"/>
+  <logger level="info" name="org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener"/>
+  <logger level="info" name="org.springframework.scheduling.concurrent"/>
+  <logger level="debug" name="_org.springframework.web.servlet.HandlerMapping.Mappings"/>
+  <logger level="warn" name="org.springframework.web.servlet"/>
+
+  <!-- Application logging -->
+  <logger level="trace" name="com.ivz">
+    <appender-ref ref="ASYNC_APP"/>
+  </logger>
+
+  <root level="WARN">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>
