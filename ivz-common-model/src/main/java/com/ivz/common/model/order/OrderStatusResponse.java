@@ -1,4 +1,4 @@
-package com.ivz.p2iws.order;
+package com.ivz.common.model.order;
 
 public class OrderStatusResponse {
   private final String orderId;

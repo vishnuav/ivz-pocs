@@ -24,6 +24,7 @@
     <module>ivz-common-utils</module>
     <module>ivz-jwt-service</module>
     <module>ivz-p2iws-server</module>
+    <module>ivz-oms-service</module>
   </modules>
 
   <properties>
